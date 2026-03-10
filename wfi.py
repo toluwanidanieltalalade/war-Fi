@@ -9,13 +9,13 @@ from sklearn.metrics import r2_score
 # --------------------
 np.random.seed(42)  # For reproducibility
 training_data = pd.DataFrame({
-    "year": pd.date_range(2010, periods=14, freq='YE'),
-    "gdp_per_capita_usb": [11500, 11800, 121000, 123000, 125000, 128000,
+    "year": pd.date_range(2010, periods=14, freq="YE"),
+    "gdp_per_capita_usd": [11500, 11800, 121000, 123000, 125000, 128000,
                            130000, 132000, 135000, 137000, 140000, 142000,
-                           145000, 148000],
+                           145000, 148000],          # <-- usd, not usb
     "military_pct_gdp": [4.2, 3.9, 3.7, 3.5, 3.4, 4.8, 4.9, 5.1, 5.2,
                          5.3, 5.5, 5.6, 5.8, 5.9],
-    "military_spending_usb": [950, 1020, 1080, 1120, 1150, 1450, 1500,
+    "military_spending_usd": [950, 1020, 1080, 1120, 1150, 1450, 1500,
                               1580, 1620, 1650, 1700, 1750, 1800, 1850],
     "military_troops": [500_000, 520_000, 540_000, 560_000, 580_000,
                         620_000, 650_000, 680_000, 700_000, 720_000,
@@ -35,8 +35,8 @@ training_data["fighter_aircraft"] = np.random.randint(100, 200, size=len(trainin
 # --------------------
 # 2. MODEL SETUP & EVALUATION
 # --------------------
-features = ["gdp_per_capita_usb", "military_pct_gdp"]
-target = "military_spending_usb"
+features = ["gdp_per_capita_usd", "military_pct_gdp"]
+target = "military_spending_usd"
 
 model = LinearRegression()
 model.fit(training_data[features], training_data[target])
@@ -65,7 +65,7 @@ future_pct = 5.2      # Predicted military percentage of GDP
 
 # Create future data DataFrame for prediction
 future_data = pd.DataFrame({
-    "gdp_per_capita_usb": [future_gdp],
+    "gdp_per_capita_usd": [future_gdp],
     "military_pct_gdp": [future_pct]
 })
 
@@ -85,8 +85,8 @@ def compound_rate(start, end, periods):
     return (end / start) ** (1 / periods) - 1
 
 gdp_growth_rate = compound_rate(
-    training_data["gdp_per_capita_usb"].iloc[0],
-    latest_year_data["gdp_per_capita_usb"],
+    training_data["gdp_per_capita_usd"].iloc[0],
+    latest_year_data["gdp_per_capita_usd"],
     years
 )
 
