@@ -4,20 +4,18 @@ import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 
-# ...existing code...
+
 training_data = pd.DataFrame({
-    # …data as before…
+  
 })
 
 # Add dummy columns (for robustness)
 training_data["military_titans"] = np.random.randint(100, 200, size=len(training_data))
 training_data["fighter_aircraft"] = np.random.randint(100, 200, size=len(training_data))
 
-# ...existing code (model setup, residual plot) ...
 
-# --------------------
 # 3. SIMULATION PARAMETERS (2024)
-# --------------------
+
 future_gdp = 149_000  # Predicted GDP per capita in USD
 future_pct = 5.2      # Predicted military percentage of GDP
 
@@ -33,9 +31,9 @@ predicted_spending = model.predict(future_data)[0]
 # Extract latest values from training data for other simulation elements
 latest_year_data = training_data.iloc[-1]  # Get last row
 
-# --------------------
+
 # compute genuine annual growth rates (CAGR) for the historical series
-# --------------------
+
 years = len(training_data) - 1  # 14 points span 13 full year‑on‑year intervals
 
 def compound_rate(start, end, periods):
@@ -96,7 +94,7 @@ carriers = int(project_future_value(
     carriers_rate
 ))
 
-# ouput
+
 print("\n=== 2024 MILITARY SIMULATION RESULTS ===")
 print(f"Predicted military spending (USD) = ${predicted_spending:,.0f}")
 print(f"Army strength (personnel) = {army_strength:,}")
