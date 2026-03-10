@@ -1,11 +1,13 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score
 
 # --------------------
 # 1. LOAD DATA (Simulated)
 # --------------------
-# Create a sample DataFrame representing military data over time.
+np.random.seed(42)  # For reproducibility
 training_data = pd.DataFrame({
     "year": pd.date_range(2010, periods=14, freq='YE'),
     "gdp_per_capita_usb": [11500, 11800, 121000, 123000, 125000, 128000, 130000, 132000, 135000, 137000, 140000, 142000, 145000, 148000],
@@ -17,53 +19,92 @@ training_data = pd.DataFrame({
     "aircraft_carriers": [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
 })
 
-# Add dummy columns to avoid errors when accessing non-existent columns.
+# Add dummy columns (for robustness)
 training_data["military_titans"] = np.random.randint(100, 200, size=len(training_data))
 training_data["fighter_aircraft"] = np.random.randint(100, 200, size=len(training_data))
 
-
 # --------------------
-# 2. MODEL SETUP
+# 2. MODEL SETUP & EVALUATION
 # --------------------
-# Define features (independent variables) and target variable (dependent variable).
 features = ["gdp_per_capita_usb", "military_pct_gdp"]
 target = "military_spending_usb"
 
-# Create a linear regression model.
 model = LinearRegression()
-
-# Train the model using the training data.
 model.fit(training_data[features], training_data[target])
 
+# Evaluate model performance
+y_pred = model.predict(training_data[features])
+r2 = r2_score(training_data[target], y_pred)
+print(f"Model R² Score: {r2:.4f}")
+
+# Plot residuals (to check for patterns)
+residuals = training_data[target] - y_pred
+plt.figure(figsize=(10, 5))
+plt.scatter(training_data["year"], residuals, color='red')
+plt.axhline(y=0, color='blue', linestyle='--')
+plt.title("Residuals Plot (Model Fit Check)")
+plt.xlabel("Year")
+plt.ylabel("Residuals")
+plt.grid(True)
+plt.show()
 # --------------------
 # 3. SIMULATION PARAMETERS (2024)
 # --------------------
-# Set parameters for the simulation year 2024.
 future_gdp = 149_000  # Predicted GDP per capita in USD
-future_pct = 5.2  # Predicted military percentage of GDP
+future_pct = 5.2      # Predicted military percentage of GDP
 
-# Create a DataFrame for the future year to make prediction.
+# Create future data DataFrame for prediction
 future_data = pd.DataFrame({
     "gdp_per_capita_usb": [future_gdp],
     "military_pct_gdp": [future_pct]
 })
 
-# Predict military spending using the trained model.
+# Predict military spending using the trained model
 predicted_spending = model.predict(future_data)[0]
 
-# Extract latest values from training data for other simulation elements.
-army_strength = training_data["military_troops"].iloc[-1]  # Total army personnel
-fighter_sorties = training_data["fighter_active"].iloc[-1]  # Annual fighter sorties
-nuclear_subs = training_data["nuclear_submarines"].iloc[-1]  # Number of nuclear submarines
-carriers = training_data["aircraft_carriers"].iloc[-1]  # Number of aircraft carriers
+# Extract latest values from training data for other simulation elements
+latest_year_data = training_data.iloc[-1]  # Get last row
 
+# Calculate growth rates for other metrics (more realistic than linear projection)
+gdp_growth_rate = (training_data["gdp_per_capita_usb"].iloc[-1] -
+                   training_data["gdp_per_capita_usb"].iloc[0]) / 13
+military_troops_growth = (latest_year_data["military_troops"] - training_data["military_troops"].iloc[0]) / 13
+
+# Project future values based on recent growth trends
+def project_future_value(current_value, growth_rate, years_ahead=4):
+    return current_value * (1 + growth_rate) ** years_ahead
+
+army_strength = int(project_future_value(
+    latest_year_data["military_troops"],
+    military_troops_growth
+))
+
+fighter_sorties = int(project_future_value(
+    latest_year_data["fighter_active"],
+    (latest_year_data["fighter_active"] - training_data["fighter_active"].iloc[0]) / 13
+))
+
+nuclear_subs = int(project_future_value(
+    latest_year_data["nuclear_submarines"],
+    (latest_year_data["nuclear_submarines"] - training_data["nuclear_submarines"].iloc[0]) / 13
+))
+
+carriers = int(project_future_value(
+    latest_year_data["aircraft_carriers"],
+    (latest_year_data["aircraft_carriers"] - training_data["aircraft_carriers"].iloc[0]) / 13
+))
 
 # --------------------
 # 4. SIMULATION OUTPUT (2024)
 # --------------------
-print("=== 2024 MILITARY SIMULATION RESULTS ===")
+print("\n=== 2024 MILITARY SIMULATION RESULTS ===")
 print(f"Predicted military spending (USD) = ${predicted_spending:,.0f}")
 print(f"Army strength (personnel) = {army_strength:,}")
-print(f"Nuclear submarines = {int(nuclear_subs):,}")  # Display as integer
-print(f"Fighter sorties (annual) = {int(fighter_sorties):,}")
-print(f"Air Force battle groups = {int(carriers):,}")  # Display as integer
+print(f"Nuclear submarines = {nuclear_subs:,}")
+print(f"Fighter sorties (annual) = {fighter_sorties:,}")
+print(f"Aircraft carriers = {carriers:,}")
+# Calculate some derived metrics
+military_efficiency = predicted_spending / army_strength * 1000
+print(f"\nDerived Metrics:")
+print(f"Military efficiency (USD per soldier): ${military_efficiency:,.2f}")
+
