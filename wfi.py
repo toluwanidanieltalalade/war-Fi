@@ -5,7 +5,27 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 import json
 import os
+import sys
+import argparse
 from datetime import datetime
+
+# ==========================================
+# 0. COMMAND LINE ARGUMENTS
+# ==========================================
+parser = argparse.ArgumentParser(description="WarFi - Military Budget Simulator")
+parser.add_argument("--clear-history", action="store_true", help="Delete the local simulation_history.json file")
+args = parser.parse_args()
+
+HISTORY_FILE = "simulation_history.json"
+
+if args.clear_history:
+    if os.path.exists(HISTORY_FILE):
+        os.remove(HISTORY_FILE)
+        print(f"[System] Success! Your local '{HISTORY_FILE}' has been cleared.")
+    else:
+        print(f"[System] No history file found to clear.")
+    sys.exit(0)
+
 
 # ==========================================
 # 1. HISTORICAL DATA (US Public Data 2010-2023)
@@ -171,7 +191,6 @@ print(f"Budget per Active Soldier = {format_large_number(military_efficiency)}")
 # 8. SAVE HISTORY (Last 20 Runs)
 # ==========================================
 def save_simulation_history():
-    HISTORY_FILE = "simulation_history.json"
     MAX_HISTORY = 20
     
     current_run = {
@@ -206,6 +225,7 @@ def save_simulation_history():
             json.dump(history, f, indent=4)
             
         print(f"\n[System] Successfully saved simulation log to {HISTORY_FILE} (Tracking last {len(history)} runs).")
+        print("         (Tip: Run 'python3 wfi.py --clear-history' to delete this log)")
         
     except Exception as e:
         print(f"\n[Warning] Could not save simulation history due to an error: {e}")
