@@ -48,6 +48,12 @@ You need to have Python installed on your computer.
 
 3. **When the program asks you questions in the terminal**, type your number guesses and press enter!
 
+4. **Clear Your History Log (Optional)**  
+   If you ever want to reset the saved `simulation_history.json` tracking file, you can wipe it clean safely at any time by running:
+   ```bash
+   python3 wfi.py --clear-history
+   ```
+
 ### Example of what it looks like:
 
 ```text
