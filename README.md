@@ -1,10 +1,10 @@
 # war Fi
 
-This repository contains a small Python simulation of
+This repository contains a small Python projection of
 military‑spending data.  It builds a very simple linear‑regression
-model from a handful of synthetic time‑series and then uses that model
-together with a few other projections to produce a 2024 “military
-simulation” report.
+model from real-world United States historical time‑series data (2010-2023) 
+and then uses that model together with a few other trends to produce a 
+2024 “military simulation” report.
 
 The Final primary script is `wfi.py` ; the file is
 self‑contained and does not read or write any external data.
@@ -12,9 +12,9 @@ self‑contained and does not read or write any external data.
 
 ## What it does
 
-1. **Load / simulate data**  
-   Creates a `pandas.DataFrame` with 14 years of made‑up values for:
-    This values can be customised for personal uses
+1. **Load historical data**  
+   Creates a `pandas.DataFrame` with 14 years of real-world US public data for:
+    These values can be customised for personal uses
    * GDP per capita (USD),
    * military spending as a percentage of GDP,
    * total military spending (USD),

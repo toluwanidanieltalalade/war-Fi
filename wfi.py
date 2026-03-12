@@ -5,34 +5,32 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 
 # --------------------
-# 1. LOAD DATA (Simulated)
+# 1. LOAD DATA (Real US Public Data 2010-2023)
 # --------------------
 np.random.seed(42)  # For reproducibility
 training_data = pd.DataFrame({
-    "year": pd.date_range(2010, periods=14, freq="YE"),
-    "gdp_per_capita_usd": [115000, 118000, 121000, 123000, 125000, 128000,
-                           130000, 132000, 135000, 137000, 140000, 142000,
-                           145000, 148000],
-    "military_pct_gdp": [4.2, 3.9, 3.7, 3.5, 3.4, 4.8, 4.9, 5.1, 5.2,
-                         5.3, 5.5, 5.6, 5.8, 5.9],
-    "military_spending_usd": [950, 1020, 1080, 1120, 1150, 1450, 1500,
-                              1580, 1620, 1650, 1700, 1750, 1800, 1850],
-    "military_troops": [1_000_000, 1_050_000, 1_100_000, 1_150_000, 1_200_000,
-                        1_250_000, 1_300_000, 1_350_000, 1_400_000, 1_450_000,
-                        1_500_000, 1_550_000, 1_650_000, 1_870_000],
-    "fighter_active": [150, 160, 170, 180, 190, 210, 230, 250, 270, 290,
-                       310, 330, 350, 360],
-    "nuclear_submarines": [12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32,
-                           34, 36, 38],
-    "aircraft_carriers": [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
-                          19]
+    "year": pd.date_range("2010", periods=14, freq="YE"),
+    "gdp_per_capita_usd": [48400, 49800, 51600, 53100, 55000, 56800,
+                           58000, 60000, 63000, 65100, 63500, 70200,
+                           76300, 81600],
+    "military_pct_gdp": [4.9, 4.8, 4.4, 4.0, 3.7, 3.4, 3.3, 3.3, 3.3,
+                         3.4, 3.7, 3.5, 3.5, 3.4],
+    "military_spending_bn_usd": [738, 752, 725, 680, 654, 633, 632, 646,
+                                 682, 734, 778, 806, 877, 916],
+    "military_troops": [2_270_000, 2_250_000, 2_200_000, 2_150_000, 2_100_000,
+                        2_080_000, 2_090_000, 2_100_000, 2_120_000, 2_140_000,
+                        2_130_000, 2_110_000, 2_050_000, 1_976_000],
+    "fighter_active": [3100, 3050, 3000, 2950, 2900, 2850, 2800, 2820,
+                       2830, 2840, 2850, 2860, 2870, 2880],
+    "nuclear_submarines": [71, 71, 72, 73, 72, 71, 70, 70, 69, 68, 68, 68, 67, 67],
+    "aircraft_carriers": [11, 11, 11, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11]
 })
 
 # --------------------
 # 2. MODEL SETUP & EVALUATION
 # --------------------
 features = ["gdp_per_capita_usd", "military_pct_gdp"]
-target = "military_spending_usd"
+target = "military_spending_bn_usd"
 
 model = LinearRegression()
 model.fit(training_data[features], training_data[target])
@@ -44,9 +42,9 @@ print(f"Model R² Score: {r2_score(training_data[target], y_pred):.4f}")
 plt.figure(figsize=(10, 5))
 plt.scatter(training_data["year"], training_data[target] - y_pred, color="red")
 plt.axhline(y=0, color="blue", linestyle="--")
-plt.title("Residuals Plot")
+plt.title("Residuals Plot (US Public Data)")
 plt.xlabel("Year")
-plt.ylabel("Residuals")
+plt.ylabel("Residuals (Billions USD)")
 plt.grid(True)
 plt.savefig("residuals_plot.png")
 
@@ -68,12 +66,13 @@ projected = {col: project_future_value(col) for col in [
     "fighter_active", "nuclear_submarines", "aircraft_carriers"
 ]}
 
-# Predict spending for 2024
+# Predict spending for 2024 (in billions)
 future_data = pd.DataFrame([{
     "gdp_per_capita_usd": projected["gdp_per_capita_usd"], 
     "military_pct_gdp": projected["military_pct_gdp"]
 }])
-predicted_spending = model.predict(future_data)[0]
+predicted_spending_bn = model.predict(future_data)[0]
+predicted_spending_usd = predicted_spending_bn * 1_000_000_000
 
 army_strength = int(projected["military_troops"])
 
@@ -93,8 +92,8 @@ net_army_strength = army_strength - (retirements + natural_deaths + training_dea
 # --------------------
 # 5. SIMULATION OUTPUT (2024)
 # --------------------
-print("\n=== 2024 MILITARY SIMULATION RESULTS ===")
-print(f"Predicted military spending (USD) = ${predicted_spending:,.0f}")
+print("\n=== 2024 MILITARY SIMULATION RESULTS (US DATA PROJECTIONS) ===")
+print(f"Predicted military spending = ${predicted_spending_usd:,.0f} (${predicted_spending_bn:,.1f} Billion)")
 print(f"Projected Gross Army Strength (before attrition) = {army_strength:,}")
 print(f"  - Less Retirements: {retirements:,}")
 print(f"  - Less Natural Deaths: {natural_deaths:,}")
@@ -104,4 +103,5 @@ print(f"Nuclear submarines = {int(projected['nuclear_submarines']):,}")
 print(f"Fighter sorties (annual) = {int(projected['fighter_active']):,}")
 print(f"Aircraft carriers = {int(projected['aircraft_carriers']):,}")
 print(f"\nDerived Metrics:")
-print(f"Military efficiency (USD per active soldier): ${predicted_spending / net_army_strength * 1000:,.2f}")
+military_efficiency = predicted_spending_usd / net_army_strength
+print(f"Military efficiency (USD per active soldier): ${military_efficiency:,.2f}")
