@@ -9,13 +9,12 @@ simulation” report.
 The Final primary script is `wfi.py` ; the file is
 self‑contained and does not read or write any external data.
 
----
 
 ## What it does
 
 1. **Load / simulate data**  
    Creates a `pandas.DataFrame` with 14 years of made‑up values for:
-  --This values can be customised for personal uses--
+    This values can be customised for personal uses
    * GDP per capita (USD),
    * military spending as a percentage of GDP,
    * total military spending (USD),
@@ -45,7 +44,6 @@ self‑contained and does not read or write any external data.
    The script prints the predicted spending, projected counts and a
    derived “military efficiency” metric.
 
----
 
 ## Requirements
 
