@@ -30,10 +30,11 @@ self‑contained and does not read or write any external data.
 
    ![Residuals Plot](residuals_plot.png)
 
-3. **Set up 2025 parameters**  
-   Future 2025 economic values are dynamically
-   projected based on historical growth rates. This one‑row `DataFrame` is fed 
-   to the trained model to obtain a spending forecast.
+3. **Interactive 2025 Parameters (What-If Scenarios)**  
+   Future 2025 economic values are dynamically projected using historical data.
+   However, the script will pause and **prompt you in the terminal** to enter your own 
+   custom values for GDP, Inflation, or Military Aid (if desired). If you 
+   just press `[Enter]`, it will automatically use the calculated historical trend.
 
 4. **Project other quantities**  
    Compound annual growth rates (CAGR) are computed for troops, fighters,
@@ -48,9 +49,23 @@ self‑contained and does not read or write any external data.
    * **0.1%** Natural Expected Mortality
    * **0.02%** Training Exercise Casualties
 
-6. **Print results**  
-   The script prints the predicted spending, projected counts (with attrition deducted)
-   and a derived “military efficiency” metric.
+6. **Print Results**  
+   The script prints the interactive what-if simulation output in the terminal,
+   including projected counts (with attrition deducted) and a derived 
+   “military efficiency” metric.
+   
+```text
+==================================================
+INTERACTIVE MILITARY BUDGET SIMULATOR (2025)
+==================================================
+Enter your own estimates for 2025 to see how the budget reacts.
+Press [ENTER] to skip and just use the natural historical trend.
+
+Estimated GDP Per Capita in USD (Default: 88427.91): 
+Military Spending as % of GDP (Default: 3.21): 4.5
+Estimated Inflation Rate (%) (Default: 4.74): 3.0
+Foreign Military Aid (Billions USD) (Default: 64.64): 18.0
+```
 
 
 ## Requirements
