@@ -1,0 +1,16 @@
+[
+    {
+        "timestamp": "2026-03-12T11:51:20.948107",
+        "inputs": {
+            "gdp_per_capita": 88427.90954268175,
+            "military_pct_gdp": 3.214111154156213,
+            "inflation_rate": 4.7386564307083985,
+            "foreign_aid_bn": 64.63839656060239
+        },
+        "outputs": {
+            "predicted_spending_usd": 972909319935.2747,
+            "net_active_troops": 1835246,
+            "military_efficiency_usd": 530124.74618404
+        }
+    }
+]

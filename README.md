@@ -9,7 +9,6 @@ and then uses that model together with a few other trends to produce a
 The Final primary script is `wfi.py` ; the file is
 self‑contained and does not read or write any external data.
 
-
 ## What it does
 
 1. **Load historical data**  

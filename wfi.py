@@ -3,6 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
+import json
+import os
+from datetime import datetime
 
 # ==========================================
 # 1. HISTORICAL DATA (US Public Data 2010-2023)
@@ -127,12 +130,26 @@ training_deaths = int(gross_troops * TRAINING_DEATH_RATE)
 net_troops = gross_troops - (retirements + natural_deaths + training_deaths)
 
 # ==========================================
-# 6. SIMULATION OUTPUT
+# 6. FORMATTING UTILITIES
+# ==========================================
+def format_large_number(num):
+    """Converts a large number into a readable English string (Trillions/Billions/Millions)."""
+    if num >= 1_000_000_000_000:
+        return f"${num / 1_000_000_000_000:.2f} Trillion"
+    elif num >= 1_000_000_000:
+        return f"${num / 1_000_000_000:.2f} Billion"
+    elif num >= 1_000_000:
+        return f"${num / 1_000_000:.2f} Million"
+    else:
+        return f"${num:,.2f}"
+
+# ==========================================
+# 7. SIMULATION OUTPUT
 # ==========================================
 print("\n" + "="*50)
 print("=== 2025 SIMULATION RESULTS ===")
 print("="*50)
-print(f"Predicted Total Military Spending = ${predicted_spending_usd:,.0f} (${predicted_spending_billions:,.1f} Billion)")
+print(f"Predicted Total Military Spending = {format_large_number(predicted_spending_usd)} (${predicted_spending_usd:,.0f})")
 print(f"Projected Gross Army Strength (Before Attrition) = {gross_troops:,}")
 print(f"  - Less Retirements/Separations: {retirements:,}")
 print(f"  - Less Natural Deaths: {natural_deaths:,}")
@@ -144,4 +161,50 @@ print(f"Aircraft Carriers = {int(projected_defaults['Aircraft_Carriers']):,}")
 
 military_efficiency = predicted_spending_usd / net_troops
 print(f"\nDerived Metric (Efficiency):")
-print(f"Budget per Active Soldier = ${military_efficiency:,.2f}")
+print(f"Budget per Active Soldier = {format_large_number(military_efficiency)}")
+
+# ==========================================
+# 8. SAVE HISTORY (Last 20 Runs)
+# ==========================================
+def save_simulation_history():
+    HISTORY_FILE = "simulation_history.json"
+    MAX_HISTORY = 20
+    
+    current_run = {
+        "timestamp": datetime.now().isoformat(),
+        "inputs": {
+            "gdp_per_capita": user_gdp,
+            "military_pct_gdp": user_mil_pct,
+            "inflation_rate": user_inflation,
+            "foreign_aid_bn": user_aid
+        },
+        "outputs": {
+            "predicted_spending_usd": predicted_spending_usd,
+            "net_active_troops": net_troops,
+            "military_efficiency_usd": military_efficiency
+        }
+    }
+    
+    try:
+        # Load existing history if possible
+        if os.path.exists(HISTORY_FILE):
+            with open(HISTORY_FILE, "r") as f:
+                history = json.load(f)
+        else:
+            history = []
+            
+        # Append new run to list and slice to keep only the last 20
+        history.append(current_run)
+        history = history[-MAX_HISTORY:]
+        
+        # Save back to file
+        with open(HISTORY_FILE, "w") as f:
+            json.dump(history, f, indent=4)
+            
+        print(f"\n[System] Successfully saved simulation log to {HISTORY_FILE} (Tracking last {len(history)} runs).")
+        
+    except Exception as e:
+        print(f"\n[Warning] Could not save simulation history due to an error: {e}")
+
+# Trigger the save module
+save_simulation_history()
