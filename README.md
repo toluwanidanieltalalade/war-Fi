@@ -1,4 +1,4 @@
-# WarFi: The Military Budget Simulator
+# WarFi: The Military Budget Forecaster.
 War Finance Influenced by the book economics of war by Horst Mendershausen.
 ## What is this project?
 WarFi is a simple Python program that tries to predict how much money the United States will spend on its military in the year **2025**. It also predicts how many soldiers, submarines, planes, and aircraft carriers the military will likely have.
