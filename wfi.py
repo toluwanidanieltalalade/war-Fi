@@ -108,7 +108,7 @@ print("="*50)
 print("Enter your own estimates for 2025 to see how the budget reacts.")
 print("Press [ENTER] to skip and just use the natural historical trend.\n")
 
-def get_user_input(prompt_text, default_value):
+def get_user_input(prompt_text, default_value, min_limit=0.0, max_limit=1e15):
     user_input = input(f"{prompt_text} (Default: {default_value:.2f}): ").strip()
     if not user_input:
         return default_value
@@ -117,9 +117,12 @@ def get_user_input(prompt_text, default_value):
     clean_input = user_input.replace("$", "").replace(",", "").replace("%", "").strip()
     
     try:
-        return float(clean_input)
+        val = float(clean_input)
+        if not (min_limit <= val <= max_limit) or np.isinf(val) or np.isnan(val):
+            raise ValueError()
+        return val
     except ValueError:
-        print(f"  [!] Invalid number. Using default: {default_value:.2f}")
+        print(f"  [!] Invalid or out-of-bounds number. Using default: {default_value:.2f}")
         return default_value
 
 user_gdp = get_user_input("Estimated GDP Per Capita in USD", projected_defaults["GDP_Per_Capita"])
@@ -183,7 +186,7 @@ print(f"Nuclear Submarines = {int(projected_defaults['Nuclear_Submarines']):,}")
 print(f"Active Fighters = {int(projected_defaults['Active_Fighters']):,}")
 print(f"Aircraft Carriers = {int(projected_defaults['Aircraft_Carriers']):,}")
 
-military_efficiency = predicted_spending_usd / net_troops
+military_efficiency = predicted_spending_usd / net_troops if net_troops > 0 else 0.0
 print(f"\nDerived Metric (Efficiency):")
 print(f"Budget per Active Soldier = {format_large_number(military_efficiency)}")
 
@@ -192,6 +195,7 @@ print(f"Budget per Active Soldier = {format_large_number(military_efficiency)}")
 # ==========================================
 def save_simulation_history():
     MAX_HISTORY = 20
+    temp_file = HISTORY_FILE + ".tmp"
     
     current_run = {
         "timestamp": datetime.now().isoformat(),
@@ -208,21 +212,25 @@ def save_simulation_history():
         }
     }
     
-    try:
-        # Load existing history if possible
-        if os.path.exists(HISTORY_FILE):
+    history = []
+    if os.path.exists(HISTORY_FILE):
+        try:
             with open(HISTORY_FILE, "r") as f:
                 history = json.load(f)
-        else:
-            history = []
+        except json.JSONDecodeError:
+            print(f"[System] Warning: {HISTORY_FILE} corrupted. Creating new log.")
+        except Exception as e:
+            print(f"[Warning] Could not read existing history: {e}")
             
-        # Append new run to list and slice to keep only the last 20
-        history.append(current_run)
-        history = history[-MAX_HISTORY:]
-        
-        # Save back to file
-        with open(HISTORY_FILE, "w") as f:
+    # Append new run to list and slice to keep only the last 20
+    history.append(current_run)
+    history = history[-MAX_HISTORY:]
+    
+    try:
+        # Save to temporary file first, then atomically replace
+        with open(temp_file, "w") as f:
             json.dump(history, f, indent=4)
+        os.replace(temp_file, HISTORY_FILE)
             
         print(f"\n[System] Successfully saved simulation log to {HISTORY_FILE} (Tracking last {len(history)} runs).")
         print("         (Tip: Run 'python3 wfi.py --clear-history' to delete this log)")
